@@ -2,6 +2,7 @@ package ru.mineradio.psvs_app;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -23,14 +24,16 @@ public class MainActivity extends AppCompatActivity {
     int inRangeInY = 0;
     int inRangeInG =0;
 
-    String TAG = "BT";
-    private Bluetooth bt;
-
+    String TAG = "BLE";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
 
         // Hide the status bar.
 //        View decorView = getWindow().getDecorView();
@@ -46,16 +49,11 @@ public class MainActivity extends AppCompatActivity {
 
         final TextView inrangecount = findViewById(R.id.inRangeCount);
 
-        bt = new Bluetooth(this, mHandler);
-        connectService();
-
-
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
                 switch (i){
                     case 0:
-                        bt.sendMessage("SISKI");
                         bottom.setImageResource(R.drawable.bottom1);
                         top.setImageResource(R.drawable.top2);
                         inrangecount.setText(Integer.toString(inRange));
@@ -115,45 +113,4 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
-    public void connectService(){
-        try {
-//            status.setText("Connecting...");
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (bluetoothAdapter.isEnabled()) {
-                bt.start();
-                bt.connectDevice("MLT-BT05");  //DESKTOP-RGRSMV5
-                Log.d(TAG, "Btservice started - listening");
-//                status.setText("Connected");
-            } else {
-                Log.w(TAG, "Btservice started - bluetooth is not enabled");
-//                status.setText("Bluetooth Not enabled");
-            }
-        } catch(Exception e){
-            Log.e(TAG, "Unable to start bt ",e);
-//            status.setText("Unable to connect " +e);
-        }
-    }
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Bluetooth.MESSAGE_STATE_CHANGE:
-                    Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                    break;
-                case Bluetooth.MESSAGE_WRITE:
-                    Log.d(TAG, "MESSAGE_WRITE ");
-                    break;
-                case Bluetooth.MESSAGE_READ:
-                    Log.d(TAG, "MESSAGE_READ ");
-                    break;
-                case Bluetooth.MESSAGE_DEVICE_NAME:
-                    Log.d(TAG, "MESSAGE_DEVICE_NAME "+msg);
-                    break;
-                case Bluetooth.MESSAGE_TOAST:
-                    Log.d(TAG, "MESSAGE_TOAST "+msg);
-                    break;
-            }
-        }
-    };
 }

@@ -2,24 +2,37 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="ru.mineradio.psvs_app">
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!-- If your app targets Android 10 or higher, you can declare
+         ACCESS_FINE_LOCATION instead. -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
-        <activity
-            android:name=".MainActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
-            android:label="@string/app_name"
-            android:theme="@style/FullscreenTheme">
+        android:hardwareAccelerated="false"
+        android:theme="@style/Theme.AppCompat.Light">
+<!--        android:theme="@android:style/Theme.NoTitleBar.Fullscreen">-->
+
+        <activity android:name=".MainActivity"
+            android:screenOrientation="landscape">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".DeviceScanActivity"/>
+        <activity android:name=".DeviceControlActivity"/>
+        <service android:name=".BluetoothLeService" android:enabled="true"/>
+
     </application>
 
 </manifest>
