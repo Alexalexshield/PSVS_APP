@@ -1,10 +1,14 @@
 package ru.mineradio.psvs_app;
 
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -14,6 +18,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import static ru.mineradio.psvs_app.DeviceControlActivity.mBluetoothLeService;
+import static ru.mineradio.psvs_app.DeviceControlActivity.mDeviceAddress;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,14 +37,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Intent intent = new Intent(this, DeviceScanActivity.class);
-        startActivity(intent);
-
-
         // Hide the status bar.
-//        View decorView = getWindow().getDecorView();
-//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-//        decorView.setSystemUiVisibility(uiOptions);
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
 
         //for test change picture in location
         final ImageView bottom = findViewById(R.id.bottomIndicator);
@@ -109,6 +113,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
     }
 
     @Override
@@ -116,7 +123,69 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         // Hide the status bar.
         View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
         decorView.setSystemUiVisibility(uiOptions);
+
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+        registerReceiver(mGattUpdateReceiverMain, DeviceControlActivity.makeGattUpdateIntentFilter());
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.d("BLE2", "Connect request result=" + result);
+        }
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        unregisterReceiver(mGattUpdateReceiverMain);
+    }
+
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+    }
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+            if (!mBluetoothLeService.initialize()) {
+                Log.e("BLE2", "Unable to initialize Bluetooth");
+                finish();
+            }
+            // Automatically connects to the device upon successful start-up initialization.
+            mBluetoothLeService.connect(mDeviceAddress);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+    final BroadcastReceiver mGattUpdateReceiverMain = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            Log.d("BLE2", "onReceive");
+
+            final String action = intent.getAction();
+            if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+                String receiveBuffer = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+                if(receiveBuffer.contains("\n")) {
+                    receiveBuffer = receiveBuffer.substring(0, receiveBuffer.length() - 1);
+                    if (receiveBuffer != null) {
+                        Log.d("BLE2",receiveBuffer);
+                    }
+                    mBluetoothLeService.writeCharacteristic(receiveBuffer);
+                }
+            }
+        }
+    };
 }

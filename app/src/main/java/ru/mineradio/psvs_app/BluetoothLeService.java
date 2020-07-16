@@ -125,7 +125,6 @@ public class BluetoothLeService extends Service {
                                  final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(action);
 
-        //TODO make some extra parsing here
         if (UUID_CUSTOM_SERVICE3.equals(characteristic.getUuid())){
             final byte[] data = characteristic.getValue();
             if (data != null && data.length > 0) {
@@ -133,7 +132,6 @@ public class BluetoothLeService extends Service {
                 for (byte byteChar : data)
                     stringBuilder.append(String.format("%02X ", byteChar));
                 intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-
             }
         }
         else {
