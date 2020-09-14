@@ -51,26 +51,7 @@
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-<<<<<<< HEAD
 
-                <ImageView
-                    android:id="@+id/rZone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/rzone" />
-
-                <TextView
-                    android:id="@+id/InRedCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="16dp"
-                    android:text="0"
-                    android:textSize="36sp"
-=======
                 <ImageView
                     android:id="@+id/rZone"
                     android:layout_width="match_parent"
@@ -88,23 +69,12 @@
                     android:text="@string/redzonecount"
                     android:textSize="36sp"
                     app:layout_constraintBottom_toBottomOf="parent"
->>>>>>> JSON
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
-<<<<<<< HEAD
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content">
 
-                <ImageView
-                    android:id="@+id/yZone"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:srcCompat="@drawable/yzone" />
-
-=======
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
                 <ImageView
@@ -116,18 +86,11 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/yzone" />
 
->>>>>>> JSON
                 <TextView
                     android:id="@+id/inYelCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-<<<<<<< HEAD
-                    android:layout_marginEnd="16dp"
-                    android:text="0"
-                    android:textSize="36sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-=======
+
                     android:layout_marginEnd="32dp"
                     android:text="@string/yelzonecount"
                     android:textSize="36sp"
@@ -135,43 +98,31 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
 
->>>>>>> JSON
             </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
-<<<<<<< HEAD
 
-=======
->>>>>>> JSON
                 <ImageView
                     android:id="@+id/imageView8"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-<<<<<<< HEAD
-                    app:srcCompat="@drawable/gzone" />
 
-=======
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/gzone" />
->>>>>>> JSON
                 <TextView
                     android:id="@+id/inGreCount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-<<<<<<< HEAD
-                    android:layout_marginEnd="16dp"
-                    android:text="0"
-                    android:textSize="36sp"
-=======
+
                     android:layout_marginEnd="32dp"
                     android:text="@string/grezonecount"
                     android:textSize="36sp"
                     app:layout_constraintBottom_toBottomOf="parent"
->>>>>>> JSON
+
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -229,37 +180,7 @@
                     app:srcCompat="@drawable/left3" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
-<<<<<<< HEAD
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
 
-                    <ImageView
-                        android:id="@+id/car"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:layout_weight="1"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent"
-                        app:srcCompat="@drawable/car" />
-
-                    <TextView
-                        android:id="@+id/passangersCount"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="20dp"
-                        android:layout_marginEnd="23dp"
-                        android:text="@string/inrangecount"
-                        android:textSize="36sp"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
-
-=======
                     android:layout_width="50dp"
                     android:layout_height="wrap_content">
                     <ImageView
@@ -272,7 +193,6 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:srcCompat="@drawable/car" />
->>>>>>> JSON
 
                     <TextView
                         android:id="@+id/passangersCount"
