@@ -131,7 +131,9 @@ public class DeviceControlActivity extends Activity {
                     receiveBuffer = receiveBuffer.substring(0, receiveBuffer.length() - 1);
                     messageHandler();
                     receiveBuffer = "";
-//                    mBluetoothLeService.writeCharacteristic("SISKISOSKI");
+
+                    mBluetoothLeService.writeCharacteristic("sended text");
+
                 }
             }
         }

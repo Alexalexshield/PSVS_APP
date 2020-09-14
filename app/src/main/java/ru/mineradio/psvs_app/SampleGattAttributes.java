@@ -31,6 +31,7 @@ public class SampleGattAttributes {
         //HM-10 (MLT-BT05)
         attributes.put(CUSTOM_SERVICE3, "VLF_TX");
         attributes.put(CUSTOM_CHARACTERISTIC, "CUSTOMER DATA");
+
     }
 
     public static String lookup(String uuid, String defaultName) {

@@ -214,6 +214,7 @@ public class DeviceScanActivity extends ListActivity {
                             try
                             {
                                 condition=deviceName.equals("VLF_TX");
+
                             }
                             catch(NullPointerException e)
                             {

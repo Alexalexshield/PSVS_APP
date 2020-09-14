@@ -2,15 +2,12 @@ package ru.mineradio.psvs_app;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-<<<<<<< Updated upstream
-=======
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
->>>>>>> Stashed changes
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -36,11 +33,10 @@ public class MainActivity extends AppCompatActivity {
     int inRangeInY = 0;
     int inRangeInG =0;
 
-<<<<<<< Updated upstream
+
     String TAG = "BT";
     private Bluetooth bt;
 
-=======
     private ImageView bottom;
     private ImageView top;
 
@@ -63,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean loaded;
     // Maximumn sound stream.
     private static final int MAX_STREAMS = 5;
->>>>>>> Stashed changes
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,9 +66,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         // Hide the status bar.
-//        View decorView = getWindow().getDecorView();
-//        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-//        decorView.setSystemUiVisibility(uiOptions);
+        View decorView = getWindow().getDecorView();
+        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        decorView.setSystemUiVisibility(uiOptions);
 
         //for test change picture in location
         bottom = findViewById(R.id.bottomIndicator);
@@ -83,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
         addPassBut = findViewById(R.id.addPassBut);
 
         inrangecount = findViewById(R.id.inRangeCount);
-        inredcount = findViewById(R.id.InRedCount);
+        inredcount = findViewById(R.id.inRedCount);
         inyelcount = findViewById(R.id.inYelCount);
         ingrecount = findViewById(R.id.inGreCount);
         passangerscount = findViewById(R.id.passangersCount);
@@ -92,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
 
         bt = new Bluetooth(this, mHandler);
         connectService();
-
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -121,7 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     i= 0;
                 }
+
                 updateCounter();
+
                 handler.postDelayed(this, 500);
             }
         }, 500);
@@ -143,8 +139,7 @@ public class MainActivity extends AppCompatActivity {
         addPassBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                passangerscount.setText(Integer.toString(inRangeInR));
-                inRangeInR = 0;
+                passangerscount.setText(String.valueOf(inRangeInR));//Integer.toString(inRangeInR));
 
                 Context context = getApplicationContext();
                 CharSequence text = getString(R.string.addpassengers);
@@ -163,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
             BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
             if (bluetoothAdapter.isEnabled()) {
                 bt.start();
-                bt.connectDevice("MLT-BT05");  //DESKTOP-RGRSMV5
+                bt.connectDevice("VLF_TX");  //DESKTOP-RGRSMV5
                 Log.d(TAG, "Btservice started - listening");
 //                status.setText("Connected");
             } else {
@@ -175,9 +170,9 @@ public class MainActivity extends AppCompatActivity {
 //            status.setText("Unable to connect " +e);
         }
     }
+
     private final Handler mHandler = new Handler() {
         @Override
-<<<<<<< Updated upstream
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case Bluetooth.MESSAGE_STATE_CHANGE:
@@ -190,12 +185,14 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "MESSAGE_READ ");
                     break;
                 case Bluetooth.MESSAGE_DEVICE_NAME:
-                    Log.d(TAG, "MESSAGE_DEVICE_NAME "+msg);
+                    Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
                     break;
                 case Bluetooth.MESSAGE_TOAST:
-                    Log.d(TAG, "MESSAGE_TOAST "+msg);
+                    Log.d(TAG, "MESSAGE_TOAST " + msg);
                     break;
-=======
+            }
+        }
+
         public void onReceive(Context context, Intent intent) {
 
             Log.d("BLE2", "onReceive");
@@ -214,7 +211,6 @@ public class MainActivity extends AppCompatActivity {
                     receiveBuffer = "";
                     //mBluetoothLeService.writeCharacteristic(receiveBuffer);
                 }
->>>>>>> Stashed changes
             }
         }
     };
@@ -235,10 +231,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateCounter() {
-        inrangecount.setText(Integer.toString(inRangeInG+inRangeInR+inRangeInY));
-        inredcount.setText(Integer.toString(inRangeInR));
-        inyelcount.setText(Integer.toString(inRangeInY));
-        ingrecount.setText(Integer.toString(inRangeInG));
+
+        inrangecount.setText(String.valueOf(inRangeInG+inRangeInR+inRangeInY));
+        inredcount.setText(String.valueOf(inRangeInR));
+        inyelcount.setText(String.valueOf(inRangeInY));
+        ingrecount.setText(String.valueOf(inRangeInG));
     }
 
 
