@@ -3,7 +3,9 @@
     <string name="scheme">Scheme</string>
     <string name="inrangecount">0</string>
     <string name="redzonecount">0</string>
-
+    <string name="yelzonecount">0</string>
+    <string name="grezonecount">0</string>
+    <string name="passengerscount">0</string>
 
     <!--    TOAST TEXT-->
     <string name="addpassengers">Passangers are added</string>

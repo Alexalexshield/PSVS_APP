@@ -1,14 +1,15 @@
 package ru.mineradio.psvs_app;
 
 import android.bluetooth.BluetoothAdapter;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.SoundPool;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
@@ -17,13 +18,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.IntRange;
 import androidx.appcompat.app.AppCompatActivity;
-
-import static ru.mineradio.psvs_app.DeviceControlActivity.mBluetoothLeService;
-import static ru.mineradio.psvs_app.DeviceControlActivity.mDeviceAddress;
+import eu.amirs.JSON;
 
 
 public class MainActivity extends AppCompatActivity {
+
+    String receiveBuffer;
 
     int i = 0;
     int passangers = 0;
@@ -31,6 +33,32 @@ public class MainActivity extends AppCompatActivity {
     int inRangeInR = 0;
     int inRangeInY = 0;
     int inRangeInG =0;
+
+    String TAG = "BT";
+    private Bluetooth bt;
+
+    private ImageView bottom;
+    private ImageView top;
+
+    private Button soundBut;
+    private Button addPassBut;
+
+    private TextView inrangecount;
+    private TextView inredcount;
+    private TextView inyelcount;
+    private TextView ingrecount;
+    private TextView passangerscount;
+
+
+    // Stream type.
+    private static final int streamType = AudioManager.STREAM_MUSIC;
+    private SoundPool soundPool;
+    private AudioManager audioManager;
+    private int soundIdAlarm;
+    private float volume;
+    private boolean loaded;
+    // Maximumn sound stream.
+    private static final int MAX_STREAMS = 5;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,45 +71,50 @@ public class MainActivity extends AppCompatActivity {
         decorView.setSystemUiVisibility(uiOptions);
 
         //for test change picture in location
-        final ImageView bottom = findViewById(R.id.bottomIndicator);
-        final ImageView top = findViewById(R.id.topIndicator);
+        bottom = findViewById(R.id.bottomIndicator);
+        top = findViewById(R.id.topIndicator);
 
-        final Button soundBut = findViewById(R.id.soundBut);
-        final Button addPassBut = findViewById(R.id.addPassBut);
+        soundBut = findViewById(R.id.soundBut);
+        addPassBut = findViewById(R.id.addPassBut);
 
-        final TextView inrangecount = findViewById(R.id.inRangeCount);
+        inrangecount = findViewById(R.id.inRangeCount);
+        inredcount = findViewById(R.id.inRedCount);
+        inyelcount = findViewById(R.id.inYelCount);
+        ingrecount = findViewById(R.id.inGreCount);
+        passangerscount = findViewById(R.id.passangersCount);
+        audioInit();
+
+        bt = new Bluetooth(this, mHandler);
+        connectService();
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             public void run() {
                 switch (i){
                     case 0:
+                        bt.sendMessage("SISKI");
                         bottom.setImageResource(R.drawable.bottom1);
                         top.setImageResource(R.drawable.top2);
-                        inrangecount.setText(Integer.toString(inRange));
                         break;
                     case 1:
                         bottom.setImageResource(R.drawable.bottom2);
                         top.setImageResource(R.drawable.top3);
-                        inrangecount.setText(Integer.toString(inRange+2));
+
                         break;
                     case 2:
                         bottom.setImageResource(R.drawable.bottom3);
                         top.setImageResource(R.drawable.top1);
-                        inrangecount.setText(Integer.toString(inRange-1));
                         break;
                     default:
                         break;
                 }
                 if (i<2){
                     i++;
-                    inRange++;
                 }
                 else{
                     i= 0;
-                    inRange = 0;
                 }
-
+                //updateCounter();
                 handler.postDelayed(this, 500);
             }
         }, 500);
@@ -96,14 +129,15 @@ public class MainActivity extends AppCompatActivity {
                 int duration = Toast.LENGTH_SHORT;
 
                 Toast.makeText(context, text, duration).show();
+                playSoundAlarm();
             }
         });
 
         addPassBut.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                passangers = inRangeInR;
+                passangerscount.setText(String.valueOf(inRangeInR));//Integer.toString(inRangeInR));
+                inRangeInR = 0;
 
                 Context context = getApplicationContext();
                 CharSequence text = getString(R.string.addpassengers);
@@ -113,79 +147,151 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Intent intent = new Intent(this, DeviceScanActivity.class);
-        startActivity(intent);
-
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        // Hide the status bar.
-        View decorView = getWindow().getDecorView();
-        int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_FULLSCREEN|View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
-        decorView.setSystemUiVisibility(uiOptions);
 
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
-        registerReceiver(mGattUpdateReceiverMain, DeviceControlActivity.makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-            Log.d("BLE2", "Connect request result=" + result);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        unregisterReceiver(mGattUpdateReceiverMain);
-    }
-
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mServiceConnection);
-        mBluetoothLeService = null;
-    }
-
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-            if (!mBluetoothLeService.initialize()) {
-                Log.e("BLE2", "Unable to initialize Bluetooth");
-                finish();
+    public void connectService(){
+        try {
+//            status.setText("Connecting...");
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (bluetoothAdapter.isEnabled()) {
+                bt.start();
+                bt.connectDevice("VLF_TX");  //DESKTOP-RGRSMV5
+                Log.d(TAG, "Btservice started - listening");
+//                status.setText("Connected");
+            } else {
+                Log.w(TAG, "Btservice started - bluetooth is not enabled");
+//                status.setText("Bluetooth Not enabled");
             }
-            // Automatically connects to the device upon successful start-up initialization.
-            mBluetoothLeService.connect(mDeviceAddress);
+        } catch(Exception e){
+            Log.e(TAG, "Unable to start bt ",e);
+//            status.setText("Unable to connect " +e);
         }
+    }
 
+    private final Handler mHandler = new Handler() {
         @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case Bluetooth.MESSAGE_STATE_CHANGE:
+                    Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
+                    break;
+                case Bluetooth.MESSAGE_WRITE:
+                    Log.d(TAG, "MESSAGE_WRITE ");
+                    break;
+                case Bluetooth.MESSAGE_READ:
+                    Log.d(TAG, "MESSAGE_READ ");
+                    break;
+                case Bluetooth.MESSAGE_DEVICE_NAME:
+                    Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
+                    break;
+                case Bluetooth.MESSAGE_TOAST:
+                    Log.d(TAG, "MESSAGE_TOAST " + msg);
+                    break;
+            }
         }
     };
 
-    final BroadcastReceiver mGattUpdateReceiverMain = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
+    public void onReceive(Context context, Intent intent) {
+        Log.d("BLE2", "onReceive");
 
-            Log.d("BLE2", "onReceive");
-
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                String receiveBuffer = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                if(receiveBuffer.contains("\n")) {
-                    receiveBuffer = receiveBuffer.substring(0, receiveBuffer.length() - 1);
-                    if (receiveBuffer != null) {
-                        Log.d("BLE2",receiveBuffer);
-                    }
-                    mBluetoothLeService.writeCharacteristic(receiveBuffer);
+        final String action = intent.getAction();
+        if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
+            String tempReceiveBuffer = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
+            receiveBuffer = receiveBuffer + tempReceiveBuffer;
+            if (tempReceiveBuffer.contains("\n")) {
+                receiveBuffer = receiveBuffer.substring(0, receiveBuffer.length() - 1);
+                if (receiveBuffer != "") {
+                    Log.d("BLE2", receiveBuffer);
+                    JSON psvsjson = new JSON(receiveBuffer);
+                    updatePSVSData(psvsjson);
                 }
+                receiveBuffer = "";
+                //mBluetoothLeService.writeCharacteristic(receiveBuffer);
             }
         }
-    };
+    }
+
+    public void updatePSVSData(JSON psvsjson) {
+        if(psvsjson.key("IRR").exist()){
+            inRangeInR = psvsjson.key("IRR").intValue();
+
+        }
+        if(psvsjson.key("IRY").exist()){
+            inRangeInY = psvsjson.key("IRY").intValue();
+
+        }
+        if(psvsjson.key("IRG").exist()){
+            inRangeInG = psvsjson.key("IRG").intValue();
+
+        }
+    }
+
+    private void updateCounter() {
+        inrangecount.setText(String.valueOf(inRangeInG+inRangeInR+inRangeInY));
+        inredcount.setText(String.valueOf(inRangeInR));
+        inyelcount.setText(String.valueOf(inRangeInY));
+        ingrecount.setText(String.valueOf(inRangeInG));
+    }
+
+
+    private void audioInit() {
+
+        // AudioManager audio settings for adjusting the volume
+        audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+
+        // Current volume Index of particular stream type.
+        float currentVolumeIndex = (float) audioManager.getStreamVolume(streamType);
+
+        // Get the maximum volume index for a particular stream type.
+        float maxVolumeIndex  = (float) audioManager.getStreamMaxVolume(streamType);
+
+        // Volumn (0 --> 1)
+        this.volume = currentVolumeIndex / maxVolumeIndex;
+
+        // Suggests an audio stream whose volume should be changed by
+        // the hardware volume controls.
+        this.setVolumeControlStream(streamType);
+
+        // For Android SDK >= 21
+        if (Build.VERSION.SDK_INT >= 21 ) {
+            AudioAttributes audioAttrib = new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_GAME)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build();
+
+            SoundPool.Builder builder= new SoundPool.Builder();
+            builder.setAudioAttributes(audioAttrib).setMaxStreams(MAX_STREAMS);
+
+            this.soundPool = builder.build();
+        }
+        // for Android SDK < 21
+        else {
+            // SoundPool(int maxStreams, int streamType, int srcQuality)
+            this.soundPool = new SoundPool(MAX_STREAMS, AudioManager.STREAM_MUSIC, 0);
+        }
+
+        // When Sound Pool load complete.
+        this.soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+                loaded = true;
+            }
+        });
+
+        // Load sound file (alarm.wav) into SoundPool.
+        this.soundIdAlarm = this.soundPool.load(this, R.raw.alarm,1);
+    }
+
+    // When users click on the button "Gun"
+    public void playSoundAlarm()  {
+        if(loaded)  {
+            float leftVolumn = volume;
+            float rightVolumn = volume;
+            // Play sound of Alarm.
+            int streamId = this.soundPool.play(this.soundIdAlarm,leftVolumn, rightVolumn, 1, 0, 1f);
+        }
+    }
+
 }
+
