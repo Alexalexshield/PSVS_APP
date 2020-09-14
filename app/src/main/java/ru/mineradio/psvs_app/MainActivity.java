@@ -34,9 +34,6 @@ public class MainActivity extends AppCompatActivity {
     int inRangeInG =0;
 
 
-    String TAG = "BT";
-    private Bluetooth bt;
-
     private ImageView bottom;
     private ImageView top;
 
@@ -73,6 +70,8 @@ public class MainActivity extends AppCompatActivity {
         //for test change picture in location
         bottom = findViewById(R.id.bottomIndicator);
         top = findViewById(R.id.topIndicator);
+        //left
+        //right
 
         soundBut = findViewById(R.id.soundBut);
         addPassBut = findViewById(R.id.addPassBut);
@@ -84,44 +83,6 @@ public class MainActivity extends AppCompatActivity {
         passangerscount = findViewById(R.id.passangersCount);
 
         audioInit();
-
-        bt = new Bluetooth(this, mHandler);
-        connectService();
-
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            public void run() {
-                switch (i){
-                    case 0:
-                        bt.sendMessage("SISKI");
-                        bottom.setImageResource(R.drawable.bottom1);
-                        top.setImageResource(R.drawable.top2);
-                        break;
-                    case 1:
-                        bottom.setImageResource(R.drawable.bottom2);
-                        top.setImageResource(R.drawable.top3);
-
-                        break;
-                    case 2:
-                        bottom.setImageResource(R.drawable.bottom3);
-                        top.setImageResource(R.drawable.top1);
-                        break;
-                    default:
-                        break;
-                }
-                if (i<2){
-                    i++;
-                }
-                else{
-                    i= 0;
-                }
-
-                updateCounter();
-
-                handler.postDelayed(this, 500);
-            }
-        }, 500);
-
 
         soundBut.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -149,71 +110,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //BLE GATT SERVICES
+        final Intent intent = new Intent(this, DeviceScanActivity.class);
+        startActivity(intent);
+
     }
 
 
-    public void connectService(){
-        try {
-//            status.setText("Connecting...");
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (bluetoothAdapter.isEnabled()) {
-                bt.start();
-                bt.connectDevice("VLF_TX");  //DESKTOP-RGRSMV5
-                Log.d(TAG, "Btservice started - listening");
-//                status.setText("Connected");
-            } else {
-                Log.w(TAG, "Btservice started - bluetooth is not enabled");
-//                status.setText("Bluetooth Not enabled");
-            }
-        } catch(Exception e){
-            Log.e(TAG, "Unable to start bt ",e);
-//            status.setText("Unable to connect " +e);
-        }
-    }
 
-    private final Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            switch (msg.what) {
-                case Bluetooth.MESSAGE_STATE_CHANGE:
-                    Log.d(TAG, "MESSAGE_STATE_CHANGE: " + msg.arg1);
-                    break;
-                case Bluetooth.MESSAGE_WRITE:
-                    Log.d(TAG, "MESSAGE_WRITE ");
-                    break;
-                case Bluetooth.MESSAGE_READ:
-                    Log.d(TAG, "MESSAGE_READ ");
-                    break;
-                case Bluetooth.MESSAGE_DEVICE_NAME:
-                    Log.d(TAG, "MESSAGE_DEVICE_NAME " + msg);
-                    break;
-                case Bluetooth.MESSAGE_TOAST:
-                    Log.d(TAG, "MESSAGE_TOAST " + msg);
-                    break;
-            }
-        }
 
-        public void onReceive(Context context, Intent intent) {
 
-            Log.d("BLE2", "onReceive");
 
-            final String action = intent.getAction();
-            if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                String tempReceiveBuffer = intent.getStringExtra(BluetoothLeService.EXTRA_DATA);
-                receiveBuffer=receiveBuffer+tempReceiveBuffer;
-                if(tempReceiveBuffer.contains("\n")) {
-                    receiveBuffer = receiveBuffer.substring(0, receiveBuffer.length() - 1);
-                    if (receiveBuffer != null) {
-                        Log.d("BLE2",receiveBuffer);
-                        JSON psvsjson = new JSON(receiveBuffer);
-                        updatePSVSData(psvsjson);
-                    }
-                    receiveBuffer = "";
-                    //mBluetoothLeService.writeCharacteristic(receiveBuffer);
-                }
-            }
-        }
-    };
 
     public void updatePSVSData(JSON psvsjson) {
         if(psvsjson.key("IRR").exist()){
