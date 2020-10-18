@@ -7,7 +7,7 @@
 
     <!-- If your app targets Android 10 or higher, you can declare
          ACCESS_FINE_LOCATION instead. -->
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
 
 
@@ -29,12 +29,19 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".DeviceScanActivity"
-            android:parentActivityName=".MainActivity"/>
-        <activity android:name=".DeviceControlActivity"
-            android:parentActivityName=".MainActivity"/>
-        <service android:name=".BluetoothLeService" android:enabled="true"/>
+            android:name=".ui.BleMainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
+        </activity>
+		<activity
+            android:name=".ui.PeripheralControlActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
+        </activity>
+        <service
+            android:name=".bluetooth.BleAdapterService"
+            android:enabled="true" />
 
     </application>
-
+	
 </manifest>
